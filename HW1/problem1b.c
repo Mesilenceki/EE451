@@ -2,12 +2,15 @@
 #include <stdio.h>
 #include <time.h>
 
+double** blockMethod(double** A, double** B, double** C, int n);
+
 int main(void){
 		int i, j, k;
 		struct timespec start, stop; 
 		double time;
 		int n = 4096; // matrix size is n*n
-		
+		int blockSize;
+
 		double **A = (double**) malloc (sizeof(double*)*n);
 		double **B = (double**) malloc (sizeof(double*)*n);
 		double **C = (double**) malloc (sizeof(double*)*n);
@@ -30,14 +33,14 @@ int main(void){
 		// Your code goes here //
 		// Matrix C = Matrix A * Matrix B //	
 		//*******************************//
-		
-		
+        blockMethod(A, B, C, blockSize);
+        
 		//*******************************//
 		
 		if( clock_gettime( CLOCK_REALTIME, &stop) == -1 ) { perror("clock gettime");}		
 		time = (stop.tv_sec - start.tv_sec)+ (double)(stop.tv_nsec - start.tv_nsec)/1e9;
 		
-		printf("Number of FLOPs = %lu, Execution time = %f sec,\n%lf MFLOPs per sec\n", 2*n*n*n, time, 1/time/1e6*2*n*n*n);		
+		printf("Number of FLOPs = %u, Execution time = %f sec,\n%lf MFLOPs per sec\n", 2*n*n*n, time, 1/time/1e6*2*n*n*n);		
 		printf("C[100][100]=%f\n", C[100][100]);
 		
 		// release memory
@@ -50,4 +53,22 @@ int main(void){
 		free(B);
 		free(C);
 		return 0;
+}
+
+double** blockMethod(double** A, double** B, double** C, int blockSize) {
+	for (int row=0; row<sizeof(A); row+=blockSize) {
+		for (int col=0; col<sizeof(A); col+=blockSize) {
+			for (int k=0; k<sizeof(A); k+=blockSize) {
+				for (int i=row; i<blockSize+row; i++) {
+					for (int j=col; j<blockSize+col; j++) {
+						for (int blockK=k; blockK<blockSize+k; blockK++) {
+							C[i][j] += A[i][blockK] * B[blockK][j];
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return C;
 }
