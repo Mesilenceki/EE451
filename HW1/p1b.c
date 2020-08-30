@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include <time.h>
 
-double** blockMethod(double** A, double** B, double** C, int n);
+double** blockMethod(int n, double** A, double** B, double** C, int block);
 
-int main(void){
+int main(int argc, char* argv[]){
 		int i, j, k;
 		struct timespec start, stop; 
 		double time;
 		int n = 4096; // matrix size is n*n
-		int blockSize;
+		int blockSize = atoi(argv[1]);
 
 		double **A = (double**) malloc (sizeof(double*)*n);
 		double **B = (double**) malloc (sizeof(double*)*n);
@@ -27,21 +27,23 @@ int main(void){
 				C[i][j]=0;			
 			}
 		}
-				
+
 		if( clock_gettime(CLOCK_REALTIME, &start) == -1) { perror("clock gettime");}
-		
 		// Your code goes here //
 		// Matrix C = Matrix A * Matrix B //	
 		//*******************************//
-        blockMethod(A, B, C, blockSize);
-        
+		C = blockMethod(n, A, B, C, blockSize);
+			
 		//*******************************//
-		
+			
 		if( clock_gettime( CLOCK_REALTIME, &stop) == -1 ) { perror("clock gettime");}		
 		time = (stop.tv_sec - start.tv_sec)+ (double)(stop.tv_nsec - start.tv_nsec)/1e9;
-		
+			
+		printf("Blocksize is %u\n", blockSize);
 		printf("Number of FLOPs = %u, Execution time = %f sec,\n%lf MFLOPs per sec\n", 2*n*n*n, time, 1/time/1e6*2*n*n*n);		
-		printf("C[100][100]=%f\n", C[100][100]);
+		printf("C[100][100]=%f\n", C[100][100]);	
+			
+		
 		
 		// release memory
 		for (i=0; i<n; i++) {
@@ -55,10 +57,11 @@ int main(void){
 		return 0;
 }
 
-double** blockMethod(double** A, double** B, double** C, int blockSize) {
-	for (int row=0; row<sizeof(A); row+=blockSize) {
-		for (int col=0; col<sizeof(A); col+=blockSize) {
-			for (int k=0; k<sizeof(A); k+=blockSize) {
+double** blockMethod(int n, double** A, double** B, double** C, int blockSize) {
+	for (int row=0; row<n; row+=blockSize) {
+		for (int col=0; col<n; col+=blockSize) {
+			for (int k=0; k<n; k+=blockSize) {
+				//compute the submatrix
 				for (int i=row; i<blockSize+row; i++) {
 					for (int j=col; j<blockSize+col; j++) {
 						for (int blockK=k; blockK<blockSize+k; blockK++) {
