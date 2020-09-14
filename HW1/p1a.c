@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 
-double** naiveMethod(double** A, double** B, double** C);
+double** naiveMethod(int n, double** A, double** B, double** C);
 
 int main(void){
 		int i, j, k;
@@ -32,7 +32,7 @@ int main(void){
 		// Your code goes here //
 		// Matrix C = Matrix A * Matrix B //	
 		//*******************************//
-        naiveMethod(A, B, C);
+        C = naiveMethod(n, A, B, C);
 		//*******************************//
 		
 		if( clock_gettime( CLOCK_REALTIME, &stop) == -1 ) { perror("clock gettime");}		
@@ -53,10 +53,10 @@ int main(void){
 		return 0;
 }
 
-double** naiveMethod(double** A, double** B, double** C) {
-	for (int i=0; i<sizeof(A); i++) {
-            for (int j=0; j<sizeof(A); j++) {
-                for (int k=0; k<sizeof(A); k++) {
+double** naiveMethod(int n, double** A, double** B, double** C) {
+	for (int i=0; i<n; i++) {
+            for (int j=0; j<n; j++) {
+                for (int k=0; k<n; k++) {
                     C[i][j] += A[i][k]*B[k][j];
                 }
             }
